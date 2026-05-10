@@ -7,12 +7,16 @@ pipeline {
 
     stages {
 
-        // ❗ REMOVE manual checkout (Jenkins already does it)
-        // If you still want manual control, fix branch to 'master'
+        stage('Checkout SCM') {
+            steps {
+                git branch: 'main',
+                url: 'https://github.com/vikas-1421/MavenAnsibleWebApp1.git'
+            }
+        }
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                sh 'mvn clean compile'
             }
         }
 
@@ -24,29 +28,19 @@ pipeline {
 
         stage('Archive') {
             steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-            }
-        }
-
-        stage('Run Application') {
-            steps {
-                sh '''
-                if pgrep -f MyMavenApp.jar; then
-                    echo "App already running"
-                else
-                    nohup java -jar target/*.jar > app.log 2>&1 &
-                fi
-                '''
+                sh 'mvn package -DskipTests'
             }
         }
     }
 
     post {
+
         success {
-            echo 'Build successful!'
+            echo 'Build Successful'
         }
+
         failure {
-            echo 'Build failed!'
+            echo 'Build Failed'
         }
     }
 }
